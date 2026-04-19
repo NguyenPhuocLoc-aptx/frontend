@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5054/api';
+const API_BASE_URL = 'http://localhost:5054';
 
 class AuthService {
     static async signup(fullName, email, password) {

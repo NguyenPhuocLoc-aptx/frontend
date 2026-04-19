@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>Orchestrate | Access Your Workspace</title>
+  <title>Dynblath | Access Your Workspace</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap"
     rel="stylesheet" />
@@ -111,7 +111,7 @@
     <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent"></div>
     <div class="relative z-10 max-w-lg">
       <h1 class="text-5xl font-black tracking-tight text-on-surface mb-6 leading-tight">
-        Orchestrate your <span class="text-primary">vision.</span>
+        Dynblath your <span class="text-primary">vision.</span>
       </h1>
       <p class="text-xl text-on-surface-variant leading-relaxed mb-8">
         The editorial workspace designed for high-level builders. Move through your projects with the clarity of a
@@ -137,8 +137,8 @@
     <!-- Floating Brand Anchor -->
     <div class="absolute top-12 left-12 lg:hidden">
       <div class="text-xl font-bold tracking-tight text-on-surface flex items-center gap-2">
-        <span class="w-8 h-8 brand-gradient rounded-xl flex items-center justify-center text-white">O</span>
-        Orchestrate
+        <span class="w-8 h-8 brand-gradient rounded-xl flex items-center justify-center text-white">D</span>
+        Dynblath
       </div>
     </div>
     <!-- Auth Container -->
@@ -201,7 +201,7 @@
           </button>
         </div>
         <p class="text-center text-sm text-on-surface-variant">
-          New to Orchestrate?
+          New to Dynblath?
           <button class="text-primary font-bold hover:underline"
             onclick="document.getElementById('login-section').classList.add('hidden'); document.getElementById('signup-section').classList.remove('hidden')">Create
             an account</button>
@@ -275,11 +275,11 @@
         <a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
         <a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
         <a class="hover:text-primary transition-colors" href="#">System Status</a>
-        <span>© 2024 Orchestrate Inc.</span>
+        <span>© 2024 Dynblath Inc.</span>
       </div>
     </div>
   </div>
-  <script src="../auth.js"></script>
+  <script src="/auth.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const loginForm = document.querySelector('#login-section form');
@@ -310,7 +310,7 @@
 
           if (result.success) {
             alert(result.message);
-            window.location.href = '../kanban_board/code.html';
+            window.location.href = '/kanban_board/code.html';
           } else {
             alert('Login failed: ' + result.message);
           }
@@ -347,7 +347,7 @@
 
           if (result.success) {
             alert(result.message);
-            window.location.href = '../kanban_board/code.html';
+            window.location.href = '/kanban_board/code.html';
           } else {
             alert('Signup failed: ' + result.message);
           }

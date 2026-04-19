@@ -127,7 +127,7 @@
                     data-icon="rocket_launch">rocket_launch</span>
             </div>
             <div>
-                <h2 class="text-lg font-black text-blue-700 dark:text-blue-400 leading-none">Orchestrate</h2>
+                <h2 class="text-lg font-black text-blue-700 dark:text-blue-400 leading-none">Dynblath</h2>
                 <p class="text-[10px] uppercase tracking-widest text-slate-500 mt-1">Premium Tier</p>
             </div>
         </div>
@@ -462,12 +462,12 @@
         class="fixed bottom-8 right-8 w-14 h-14 primary-gradient text-white rounded-full flex items-center justify-center shadow-2xl shadow-primary/40 hover:scale-110 active:scale-95 transition-all z-50 md:hidden">
         <span class="material-symbols-outlined text-2xl" data-icon="add">add</span>
     </button>
-    <script src="../auth.js"></script>
+    <script src="/auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             if (!AuthService.isAuthenticated()) {
                 alert('Please login first');
-                window.location.href = '../orchestrate_task_management_app/code.html';
+                window.location.href = '/orchestrate_task_management_app/code.html';
                 return;
             }
 

@@ -1,3 +1,5 @@
+const API_BASE_URL = 'http://localhost:5054';
+
 class ApiService {
     static getHeaders() {
         return {
@@ -7,7 +9,21 @@ class ApiService {
     }
 
     static async request(method, path, body = null) {
-        // ... (keep your existing request method logic) ...
+        try {
+            const options = {
+                method,
+                headers: this.getHeaders()
+            };
+            if (body) options.body = JSON.stringify(body);
+            
+            const response = await fetch(`${API_BASE_URL}${path}`, options);
+            if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
+            
+            return await response.json();
+        } catch (error) {
+            console.error('API Error:', error);
+            throw error;
+        }
     }
 
     // ── Workspaces ──

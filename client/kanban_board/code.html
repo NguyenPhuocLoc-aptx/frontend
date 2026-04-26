@@ -615,11 +615,18 @@
         async function updateTaskField(field, value) {
             if (!currentTaskId) return;
             const task = allTasks.find(t => t.id === currentTaskId);
-            if (!task || task[field] === value) return;
-            task[field] = value;
+            if (!task) return;
+            let sendValue = value;
+            if (field === 'due_date' && value && !value.includes('T')) {
+                sendValue = value + 'T00:00:00';
+            }
+
+            if (task[field] === sendValue) return;
+            task[field] = sendValue;
             renderBoard();
+
             try {
-                await ApiService.updateTask(currentTaskId, { [field]: value });
+                await ApiService.updateTask(currentTaskId, { [field]: sendValue });
             } catch (e) {
                 showToast('Failed to save change', 'error');
             }
@@ -710,13 +717,16 @@
             btn.disabled = true; btn.textContent = 'Creating…';
 
             try {
+                const rawDate = document.getElementById('new-task-due').value;
+                const dueDate = rawDate ? rawDate + 'T00:00:00' : null;
+
                 const payload = {
                     title,
                     description: document.getElementById('new-task-desc').value.trim(),
                     status: document.getElementById('new-task-status').value,
                     priority: document.getElementById('new-task-priority').value,
                     type: document.getElementById('new-task-type').value,
-                    due_date: document.getElementById('new-task-due').value || null,
+                    due_date: dueDate,
                 };
                 const task = await ApiService.createTask(projectId, payload);
                 allTasks.unshift(task);

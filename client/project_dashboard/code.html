@@ -353,13 +353,11 @@
                     document.getElementById('workspace-title').textContent = workspaces[0].name;
                     await loadProjects();
                 } else {
-                    // No workspace — auto create one
-                    const user = AuthService.getUser();
                     const ws = await ApiService.createWorkspace({
-                        name: `${user.fullName || 'My'}'s Workspace`,
-                        slug: `workspace-${Date.now()}`
+                        name: 'My Workspace',
+                        slug: 'my-workspace-' + Date.now()
                     });
-                    if (ws) {
+                    if (ws && ws.id) {
                         workspaceId = ws.id;
                         document.getElementById('workspace-title').textContent = ws.name;
                     }
@@ -367,8 +365,6 @@
                 }
             } catch (e) {
                 console.error('loadWorkspace error:', e);
-                const err = document.getElementById('modal-error');
-                if (err) err.textContent = 'Failed to load workspace: ' + e.message;
                 renderEmptyProjects();
             }
         }

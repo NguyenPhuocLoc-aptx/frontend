@@ -1,11 +1,11 @@
-const API_BASE_URL = 'http://localhost:5054';
-
 class ApiService {
     static getHeaders() {
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${AuthService.getToken()}`
-        };
+        const token = AuthService.getToken();
+        const headers = { 'Content-Type': 'application/json' };
+        // Only attach Authorization if a token actually exists
+        // Prevents sending "Bearer null" which triggers a 401
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        return headers;
     }
 
     static async request(method, path, body = null) {
@@ -15,52 +15,66 @@ class ApiService {
                 headers: this.getHeaders()
             };
             if (body) options.body = JSON.stringify(body);
-            
+
             const response = await fetch(`${API_BASE_URL}${path}`, options);
-            if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
-            
-            return await response.json();
+
+            // Token missing, expired, or invalid — redirect to login immediately
+            if (response.status === 401) {
+                console.warn('Session expired or not authenticated. Redirecting to login.');
+                AuthService.logout();
+                return null;
+            }
+
+            if (!response.ok) {
+                const errText = await response.text().catch(() => '');
+                throw new Error(`Request failed with status ${response.status}${errText ? ': ' + errText : ''}`);
+            }
+
+            // Handle empty responses (e.g. 204 No Content)
+            const text = await response.text();
+            return text ? JSON.parse(text) : null;
+
         } catch (error) {
-            console.error('API Error:', error);
+            console.error(`API Error [${method} ${path}]:`, error);
             throw error;
         }
     }
 
     // ── Workspaces ──
-    static getWorkspaces() { return this.request('GET', '/api/workspaces'); }
-    static createWorkspace(data) { return this.request('POST', '/api/workspaces', data); }
-    static getWorkspace(id) { return this.request('GET', `/api/workspaces/${id}`); }
+    static getWorkspaces()           { return this.request('GET',    '/api/workspaces'); }
+    static createWorkspace(data)     { return this.request('POST',   '/api/workspaces', data); }
+    static getWorkspace(id)          { return this.request('GET',    `/api/workspaces/${id}`); }
 
     // ── Projects ──
-    static getProjects(workspaceId) { return this.request('GET', `/api/workspaces/${workspaceId}/projects`); }
-    static createProject(workspaceId, data) { return this.request('POST', `/api/workspaces/${workspaceId}/projects`, data); }
-    static getProject(id) { return this.request('GET', `/api/projects/${id}`); }
-    static updateProject(id, data) { return this.request('PUT', `/api/projects/${id}`, data); }
-    static deleteProject(id) { return this.request('DELETE', `/api/projects/${id}`); }
+    static getProjects(workspaceId)          { return this.request('GET',    `/api/workspaces/${workspaceId}/projects`); }
+    static createProject(workspaceId, data)  { return this.request('POST',   `/api/workspaces/${workspaceId}/projects`, data); }
+    static getProject(id)                    { return this.request('GET',    `/api/projects/${id}`); }
+    static updateProject(id, data)           { return this.request('PUT',    `/api/projects/${id}`, data); }
+    static deleteProject(id)                 { return this.request('DELETE', `/api/projects/${id}`); }
 
     // ── Tasks ──
-    static getTasks(projectId) { return this.request('GET', `/api/projects/${projectId}/tasks`); }
-    static createTask(projectId, data) { return this.request('POST', `/api/projects/${projectId}/tasks`, data); }
-    static getTask(id) { return this.request('GET', `/api/tasks/${id}`); }
-    static updateTask(id, data) { return this.request('PUT', `/api/tasks/${id}`, data); }
-    static deleteTask(id) { return this.request('DELETE', `/api/tasks/${id}`); }
-    static updateTaskStatus(id, status) { return this.request('PATCH', `/api/tasks/${id}/status`, { status }); }
+    static getTasks(projectId)               { return this.request('GET',    `/api/projects/${projectId}/tasks`); }
+    static createTask(projectId, data)       { return this.request('POST',   `/api/projects/${projectId}/tasks`, data); }
+    static getTask(id)                       { return this.request('GET',    `/api/tasks/${id}`); }
+    static updateTask(id, data)              { return this.request('PUT',    `/api/tasks/${id}`, data); }
+    static deleteTask(id)                    { return this.request('DELETE', `/api/tasks/${id}`); }
+    static updateTaskStatus(id, status)      { return this.request('PATCH',  `/api/tasks/${id}/status`, { status }); }
 
     // ── Comments ──
-    static getComments(taskId) { return this.request('GET', `/api/tasks/${taskId}/comments`); }
-    static createComment(taskId, content) { return this.request('POST', `/api/tasks/${taskId}/comments`, { content }); }
-    static deleteComment(id) { return this.request('DELETE', `/api/comments/${id}`); }
+    static getComments(taskId)               { return this.request('GET',    `/api/tasks/${taskId}/comments`); }
+    static createComment(taskId, content)    { return this.request('POST',   `/api/tasks/${taskId}/comments`, { content }); }
+    static deleteComment(id)                 { return this.request('DELETE', `/api/comments/${id}`); }
 
     // ── Members ──
-    static getProjectMembers(projectId) { return this.request('GET', `/api/projects/${projectId}/members`); }
-    static getWorkspaceMembers(workspaceId) { return this.request('GET', `/api/workspaces/${workspaceId}/members`); }
+    static getProjectMembers(projectId)      { return this.request('GET',    `/api/projects/${projectId}/members`); }
+    static getWorkspaceMembers(workspaceId)  { return this.request('GET',    `/api/workspaces/${workspaceId}/members`); }
 
     // ── Notifications ──
-    static getNotifications() { return this.request('GET', '/api/notifications'); }
-    static markNotificationRead(id) { return this.request('PATCH', `/api/notifications/${id}/read`); }
-    static markAllRead() { return this.request('PATCH', '/api/notifications/read-all'); }
+    static getNotifications()                { return this.request('GET',    '/api/notifications'); }
+    static markNotificationRead(id)          { return this.request('PATCH',  `/api/notifications/${id}/read`); }
+    static markAllRead()                     { return this.request('PATCH',  '/api/notifications/read-all'); }
 
     // ── Labels ──
-    static getLabels(projectId) { return this.request('GET', `/api/projects/${projectId}/labels`); }
-    static createLabel(projectId, data) { return this.request('POST', `/api/projects/${projectId}/labels`, data); }
+    static getLabels(projectId)              { return this.request('GET',    `/api/projects/${projectId}/labels`); }
+    static createLabel(projectId, data)      { return this.request('POST',   `/api/projects/${projectId}/labels`, data); }
 }

@@ -1,47 +1,62 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
-import AuthPage from './pages/auth/AuthPage';
-import LoadingSpinner from './components/ui/LoadingSpinner';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ToastProvider } from "./context/ToastContext";
+import AuthPage from "./pages/auth/AuthPage";
+import AppLayout from "./components/layout/AppLayout";
+import DashboardPage from "./pages/dashboard/DashboardPage";
+import BoardPage from "./pages/board/BoardPage";
 
-// Placeholder components for your pages
-const Dashboard = () => <div className="p-8"><h1 className="text-3xl font-bold">Dashboard</h1></div>;
-const NotFound = () => <div className="p-8"><h1 className="text-2xl font-bold">Page Not Found</h1></div>;
+function ProtectedRoute({ children }) {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? children : <Navigate to="/auth" replace />;
+}
 
-const ProtectedRoute = ({ children }) => {
-    const { isAuthenticated, loading } = useAuth();
+function PublicRoute({ children }) {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;
+}
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <LoadingSpinner size="lg" />
-            </div>
-        );
-    }
+function ComingSoon({ label }) {
+    return (
+        <div className="flex items-center justify-center h-64">
+            <p className="text-on-surface-variant font-semibold">{label} — coming soon</p>
+        </div>
+    );
+}
 
-    if (!isAuthenticated) {
-        return <Navigate to="/" replace />;
-    }
+function AppRoutes() {
+    return (
+        <Routes>
+            <Route path="/" element={<Navigate to="/auth" replace />} />
 
-    return children;
-};
+            <Route path="/auth" element={
+                <PublicRoute><AuthPage /></PublicRoute>
+            } />
+
+            <Route path="/" element={
+                <ProtectedRoute><AppLayout /></ProtectedRoute>
+            }>
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="board/:projectId" element={<BoardPage />} />
+                <Route path="board" element={<Navigate to="/dashboard" replace />} />
+                <Route path="tasks" element={<ComingSoon label="My Tasks" />} />
+                <Route path="messages" element={<ComingSoon label="Messages" />} />
+                <Route path="notifications" element={<ComingSoon label="Notifications" />} />
+            </Route>
+
+            <Route path="*" element={<Navigate to="/auth" replace />} />
+        </Routes>
+    );
+}
 
 export default function App() {
-    const { isAuthenticated } = useAuth();
-
     return (
-        <Router>
-            <Routes>
-                <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <AuthPage />} />
-                <Route
-                    path="/dashboard"
-                    element={
-                        <ProtectedRoute>
-                            <Dashboard />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route path="*" element={<NotFound />} />
-            </Routes>
-        </Router>
+        <BrowserRouter>
+            <AuthProvider>
+                <ToastProvider>
+                    <AppRoutes />
+                </ToastProvider>
+            </AuthProvider>
+        </BrowserRouter>
     );
 }

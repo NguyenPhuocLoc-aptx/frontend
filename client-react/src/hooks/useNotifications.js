@@ -1,4 +1,3 @@
-// src/hooks/useNotifications.js
 import { useState, useEffect, useCallback, useRef } from "react";
 import { notificationService } from "../services/api";
 import { useAuth } from "../context/AuthContext";
